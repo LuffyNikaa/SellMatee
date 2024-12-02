@@ -1,9 +1,10 @@
 package com.example.sellmate.data.model
 
-// Data model untuk produk
 data class Product(
-    val name: String,
-    val type: String,
-    val price: Double,
-    val quantity: Int
+    val id: String = "",
+    val name: String = "",
+    val category: String = "",
+    val price: Int = 0,
+    val quantity: Int = 0,
+    var isNew: Boolean = false
 )
