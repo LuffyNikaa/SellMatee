@@ -2,10 +2,9 @@ package com.example.sellmate.ui.product
 
 
 
-
-
 import HistoryViewModel
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,10 +17,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sellmate.BottomNavigationBar
+import com.example.sellmate.R
 import com.example.sellmate.data.model.Product
 
 
@@ -174,37 +176,79 @@ fun ProductCard(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        shape = RoundedCornerShape(8.dp)
+            .fillMaxWidth(1f) // Mengurangi lebar menjadi 90% dari lebar layar
+            .padding(16.dp), // Memberikan padding pada card
+        shape = RoundedCornerShape(16.dp), // Ganti sudut menjadi lebih melengkung
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF7C93C3)) // Warna latar belakang
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Name: ${product.name}")
-            Text("Category: ${product.category}")
-            Text("Price: Rp ${product.price}")
-            Text("Quantity: ${product.quantity}")
+            // Baris utama untuk gambar produk dan informasi
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Gambar produk lebih besar dan sudut melengkung
+                Image(
+                    painter = painterResource(id = R.drawable.placeholder), // Ganti dengan resource gambar
+                    contentDescription = "Product Image",
+                    modifier = Modifier
+                        .size(100.dp) // Gambar lebih kecil
+                        .clip(RoundedCornerShape(12.dp)) // Gambar dengan sudut melengkung
+                        .padding(end = 16.dp)
+                )
+
+                // Informasi produk dengan susunan vertikal
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Name: ${product.name}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Category: ${product.category}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Price: Rp ${product.price}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Quantity: ${product.quantity}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Tombol Edit dan Delete, letakkan di kanan bawah
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End // Mengatur tombol ke kanan
             ) {
                 // Tombol Edit
                 IconButton(onClick = onEditClick) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.White
+                    )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Tombol Delete dengan Ikon Sampah
+                // Tombol Delete
                 IconButton(onClick = onDeleteClick) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White
+                    )
                 }
             }
         }
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

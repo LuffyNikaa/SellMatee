@@ -3,6 +3,7 @@ package com.example.sellmate.ui.components
 
 import HistoryViewModel
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,122 +33,135 @@ fun AddProductScreen(
     var productCategory by remember { mutableStateOf("") }
     var productPrice by remember { mutableStateOf("") }
     var productQuantity by remember { mutableStateOf("") }
-    var showToast by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) } // Untuk dropdown menu
+    val categories = listOf("Ring", "Bracelet", "Necklace") // Daftar kategori
+    var selectedCategory by remember { mutableStateOf("") }
 
     // Fungsi untuk menambah produk ke Firestore
     fun addProductToFirestore() {
-        if (productName.isNotEmpty() && productCategory.isNotEmpty() && productPrice.isNotEmpty() && productQuantity.isNotEmpty()) {
+        if (productName.isNotEmpty() && selectedCategory.isNotEmpty() && productPrice.isNotEmpty() && productQuantity.isNotEmpty()) {
             val product = Product(
                 name = productName,
-                category = productCategory,
+                category = selectedCategory,
                 price = productPrice.toInt(),
                 quantity = productQuantity.toInt()
             )
-
-            productViewModel.addProduct(product) // Menambahkan produk ke Firestore
-
-            // Tambahkan ke history di Firestore
+            productViewModel.addProduct(product)
             historyViewModel.addHistory("Produk ${product.name} ditambahkan pada ${formatTimestamp(System.currentTimeMillis())}")
-
             navController.navigate("product")
         }
     }
-    // Form untuk menambahkan produk
+
+    // Tampilan UI
     Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxSize()
+            .background(Color(0xFF7C93C3)) // Warna biru muda
+            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Text(
-            "Add New Product",
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color(0xFF1976D2) // Biru
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // Input untuk Kategori (Dropdown)
+        Text("Kategori", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = selectedCategory,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text("Pilih Kategori") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    containerColor = Color.White,
+                    focusedBorderColor = Color(0xFF1976D2),
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = { Text(category) },
+                        onClick = {
+                            selectedCategory = category
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
 
-        // Input untuk Nama Produk
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Input untuk Nama
+        Text("Nama", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
         OutlinedTextField(
             value = productName,
             onValueChange = { productName = it },
-            label = { Text("Nama Produk") },
+            placeholder = { Text("Nama Produk") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF1976D2), // Biru saat fokus
-                unfocusedBorderColor = Color(0xFFBBDEFB) // Biru muda saat tidak fokus
-            ),
-            textStyle = TextStyle(color = Color.Black) // Menentukan warna teks dalam input field
+                containerColor = Color.White,
+                focusedBorderColor = Color(0xFF1976D2),
+                unfocusedBorderColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Input untuk Kategori Produk
-        OutlinedTextField(
-            value = productCategory,
-            onValueChange = { productCategory = it },
-            label = { Text("Kategori") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF1976D2), // Biru saat fokus
-                unfocusedBorderColor = Color(0xFFBBDEFB) // Biru muda saat tidak fokus
-            ),
-            textStyle = TextStyle(color = Color.Black) // Menentukan warna teks dalam input field
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Input untuk Harga Produk
+        // Input untuk Harga
+        Text("Harga", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
         OutlinedTextField(
             value = productPrice,
             onValueChange = { productPrice = it },
-            label = { Text("Harga") },
+            placeholder = { Text("Rp") },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF1976D2), // Biru saat fokus
-                unfocusedBorderColor = Color(0xFFBBDEFB) // Biru muda saat tidak fokus
-            ),
-            textStyle = TextStyle(color = Color.Black) // Menentukan warna teks dalam input field
+                containerColor = Color.White,
+                focusedBorderColor = Color(0xFF1976D2),
+                unfocusedBorderColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Input untuk Kuantitas Produk
+        // Input untuk Kuantitas
+        Text("Jumlah", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
         OutlinedTextField(
             value = productQuantity,
             onValueChange = { productQuantity = it },
-            label = { Text("Jumlah") },
+            placeholder = { Text("Jumlah") },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF1976D2), // Biru saat fokus
-                unfocusedBorderColor = Color(0xFFBBDEFB) // Biru muda saat tidak fokus
-            ),
-            textStyle = TextStyle(color = Color.Black) // Menentukan warna teks dalam input field
+                containerColor = Color.White,
+                focusedBorderColor = Color(0xFF1976D2),
+                unfocusedBorderColor = Color.Gray
+            )
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Tombol Tambah Produk
+        // Tombol Tambah
         Button(
             onClick = { addProductToFirestore() },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1976D2) // Biru
-            ),
-            contentPadding = PaddingValues(16.dp)
+                containerColor = Color(0xFF001F54) // Warna biru gelap
+            )
         ) {
-            Text("Tambah", color = Color.White)
-        }
-
-        // Menampilkan Toast jika produk berhasil ditambahkan
-        if (showToast) {
-            Toast.makeText(navController.context, "Product added successfully!", Toast.LENGTH_SHORT).show()
-            showToast = false
+            Text("Add", color = Color.White, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
-

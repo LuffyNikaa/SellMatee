@@ -1,34 +1,75 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.sellmate
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.*
+import androidx.navigation.compose.rememberNavController
 import com.example.sellmate.ui.theme.SellMateTheme
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.text.style.TextAlign
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navController: NavController) {
     val selectedIndex = remember { mutableStateOf(0) }
 
-    // Set up NavHost for navigation management
-
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { SearchBar(navController) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Logo bundar di kiri atas
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(color = Color.White, shape = CircleShape)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.sellmate),
+                                // Ganti dengan logo Anda
+                                contentDescription = "SellMate Logo",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp)) // Spacer untuk memberi jarak antara logo dan teks
+
+                        // Teks "SellMate" di samping logo
+                        Text(
+                            text = "SellMate",
+                            style = MaterialTheme.typography.titleLarge, // Menggunakan style titleLarge
+                            color = Color.White // Warna teks putih
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = Color(0xFF7C93C3) // Latar belakang TopBar
+                ),
+                actions = {
+                    IconButton(onClick = { navController.navigate("profile") }) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile Icon", tint = Color.White)
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate("addProduct") },
@@ -64,7 +105,7 @@ fun Home(navController: NavController) {
 fun BottomNavigationBar(
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit,
-    navController: NavController // Parameter ini diperlukan
+    navController: NavController
 ) {
     NavigationBar(
         containerColor = Color(0xFF8DA7CC)
@@ -84,7 +125,7 @@ fun BottomNavigationBar(
             selected = selectedIndex == 0,
             onClick = {
                 onItemSelected(0)
-                navController.navigate("home") // Navigasi ke halaman Home
+                navController.navigate("home")
             }
         )
         NavigationBarItem(
@@ -99,7 +140,7 @@ fun BottomNavigationBar(
             selected = selectedIndex == 1,
             onClick = {
                 onItemSelected(1)
-                navController.navigate("product") // Navigasi ke halaman Products
+                navController.navigate("product")
             }
         )
         NavigationBarItem(
@@ -114,60 +155,71 @@ fun BottomNavigationBar(
             selected = selectedIndex == 2,
             onClick = {
                 onItemSelected(2)
-                navController.navigate("history") // Navigasi ke halaman History
+                navController.navigate("history")
             }
         )
     }
 }
 
 @Composable
-fun SearchBar(navController: NavController) {
-    Row(
+fun HomeScreen(navController: NavController) {
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        TextField(
-            value = "",
-            onValueChange = { /* Handle search text change */ },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp),
-            placeholder = { Text("Search") },
-            leadingIcon = {
-                Icon(Icons.Filled.Search, contentDescription = "Search Icon")
-            },
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color(0xFFEADAB7),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
+        // Gambar orang melambai
+        Image(
+            painter = painterResource(id = R.drawable.orang), // Ganti dengan resource gambar
+            contentDescription = "Waving Person",
+            modifier = Modifier.size(200.dp)
         )
-        IconButton(onClick = {
-            navController.navigate("profile") // Navigasi ke halaman Profil
-        }) {
-            Icon(Icons.Filled.Person, contentDescription = "Profile Icon")
+
+        Spacer(modifier = Modifier.height(16.dp)) // Memberi jarak setelah gambar
+
+        // Teks "Selamat Datang"
+        Text(
+            text = "Selamat Datang di aplikasi SellMate",
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp)) // Memberi jarak sebelum box
+
+        // Box dengan penjelasan aplikasi SellMate
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF7C93C3)) // Warna latar belakang box
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Apa itu SellMate?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp)) // Memberi jarak setelah judul
+
+                Text(
+                    text = "SellMate adalah aplikasi!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White,
+                    textAlign = TextAlign.Justify
+                )
+            }
         }
     }
 }
 
-@Composable
-fun HomeScreen(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Home Screen")
-        Button(onClick = {
-            navController.navigate("product") // Navigasi ke Product Screen
-        }) {
-            Text("Go to Products")
-        }
-    }
-}
 
 @Composable
 fun ProductScreen(navController: NavController) {
@@ -177,11 +229,6 @@ fun ProductScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
         Text("Product Screen")
-        Button(onClick = {
-            navController.navigate("history") // Navigasi ke History Screen
-        }) {
-            Text("Go to History")
-        }
     }
 }
 
@@ -193,43 +240,6 @@ fun HistoryScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
         Text("History Screen")
-        Button(onClick = {
-            navController.navigate("product") // Navigasi kembali ke Product Screen
-        }) {
-            Text("Back to Products")
-        }
-    }
-}
-
-@Composable
-fun AddProductScreen(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Add Product Screen")
-        Button(onClick = {
-            navController.popBackStack() // Kembali ke halaman sebelumnya
-        }) {
-            Text("Back to Home")
-        }
-    }
-}
-
-@Composable
-fun ProfileScreen(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Profile Screen")
-        Button(onClick = {
-            navController.popBackStack() // Kembali ke halaman sebelumnya
-        }) {
-            Text("Back to Home")
-        }
     }
 }
 
@@ -237,6 +247,6 @@ fun ProfileScreen(navController: NavController) {
 @Composable
 fun HomeScreenPreview() {
     SellMateTheme {
-        Home(navController = rememberNavController()) // Menampilkan preview dengan navController
+        Home(navController = rememberNavController())
     }
 }

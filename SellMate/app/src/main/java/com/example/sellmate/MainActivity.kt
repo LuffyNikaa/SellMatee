@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sellmate.Profile.ProfileScreen
 import com.example.sellmate.ui.components.AddProductScreen
 import com.example.sellmate.ui.product.HistoryScreen
 import com.example.sellmate.ui.product.ProductScreen
