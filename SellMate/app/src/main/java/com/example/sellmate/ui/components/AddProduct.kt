@@ -34,7 +34,7 @@ fun AddProductScreen(
     var productPrice by remember { mutableStateOf("") }
     var productQuantity by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) } // Untuk dropdown menu
-    val categories = listOf("Ring", "Bracelet", "Necklace") // Daftar kategori
+    val categories = listOf("Gelang", "Kalung", "Cincin") // Daftar kategori
     var selectedCategory by remember { mutableStateOf("") }
 
     // Fungsi untuk menambah produk ke Firestore

@@ -12,7 +12,7 @@ class ProductViewModel : ViewModel() {
     fun addProduct(product: Product) {
         val newProduct = product.copy(isNew = true)
         db.collection("products")
-            .add(product)
+            .add(newProduct)
             .addOnSuccessListener {
                 Log.d("ProductViewModel", "Product added successfully.")
             }
@@ -27,7 +27,8 @@ class ProductViewModel : ViewModel() {
             .get()
             .addOnSuccessListener { result ->
                 val products = result.documents.mapNotNull { document ->
-                    document.toObject(Product::class.java)
+                    val product = document.toObject(Product::class.java)
+                    product?.copy(id = document.id) // Menyertakan ID dokumen
                 }
                 onProductsLoaded(products)
             }
@@ -43,9 +44,8 @@ class ProductViewModel : ViewModel() {
             return
         }
 
-        // Mencari produk berdasarkan nama
         db.collection("products")
-            .whereEqualTo("name", productName)  // Mencocokkan nama produk
+            .whereEqualTo("name", productName)
             .get()
             .addOnSuccessListener { result ->
                 if (result.isEmpty) {
@@ -53,10 +53,9 @@ class ProductViewModel : ViewModel() {
                     return@addOnSuccessListener
                 }
 
-                // Hapus dokumen yang ditemukan
                 for (document in result) {
                     db.collection("products")
-                        .document(document.id)  // Mengakses dokumen berdasarkan ID
+                        .document(document.id)
                         .delete()
                         .addOnSuccessListener {
                             Log.d("ProductViewModel", "Product deleted successfully.")
@@ -70,16 +69,35 @@ class ProductViewModel : ViewModel() {
                 Log.e("ProductViewModel", "Error querying product: ${e.message}")
             }
     }
+
+    // Fungsi untuk menandai produk sebagai "tidak baru"
     fun markAsOld(productId: String) {
         db.collection("products")
             .document(productId)
             .update("isNew", false)
             .addOnSuccessListener {
-                // Logika jika berhasil diperbarui
+                Log.d("ProductViewModel", "Product marked as old successfully.")
             }
             .addOnFailureListener { e ->
-                // Tangani error jika gagal
-                e.printStackTrace()
+                Log.e("ProductViewModel", "Error marking product as old: ${e.message}")
+            }
+    }
+
+    // Fungsi untuk memperbarui produk di Firestore
+    fun updateProduct(product: Product) {
+        if (product.id.isEmpty()) {
+            Log.e("ProductViewModel", "Invalid product ID")
+            return
+        }
+
+        db.collection("products")
+            .document(product.id)
+            .set(product)
+            .addOnSuccessListener {
+                Log.d("ProductViewModel", "Produk berhasil diperbarui.")
+            }
+            .addOnFailureListener { e ->
+                Log.e("ProductViewModel", "Gagal memperbarui produk: ${e.message}")
             }
     }
 }

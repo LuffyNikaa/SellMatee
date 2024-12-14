@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sellmate.BottomNavigationBar
@@ -39,6 +41,8 @@ fun ProductScreen(
 ) {
     var productList by remember { mutableStateOf<List<Product>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
+    var showEditDialog by remember { mutableStateOf(false) } // State untuk dialog edit
+    var productToEdit by remember { mutableStateOf<Product?>(null) } // Produk yang sedang diedit
 
     // Untuk menangani dialog konfirmasi
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -82,7 +86,8 @@ fun ProductScreen(
                         showDeleteDialog = true // Menampilkan dialog konfirmasi
                     },
                     onEditClick = {
-                        navController.navigate("editProduct/${product.id}")
+                        productToEdit = product // Menyimpan produk yang akan diedit
+                        showEditDialog = true // Menampilkan dialog edit
                     }
                 )
             }
@@ -96,11 +101,8 @@ fun ProductScreen(
             onDismiss = { showDeleteDialog = false },
             onConfirmDelete = {
                 productToDelete?.name?.let { productName ->
-                    // Memanggil fungsi deleteProductByName dengan nama produk
                     productViewModel.deleteProductByName(productName)
-                    // Menambahkan riwayat penghapusan produk
                     historyViewModel.addHistory("Produk $productName telah dihapus pada ${formatTimestamp(System.currentTimeMillis())}")
-                    // Memperbarui daftar produk setelah penghapusan
                     productViewModel.getProducts { products ->
                         productList = products
                     }
@@ -110,32 +112,19 @@ fun ProductScreen(
         )
     }
 
-    // Menambahkan riwayat penambahan produk jika ada produk baru yang ditambahkan
-    LaunchedEffect(productList) {
-        productList.forEach { product ->
-            if (product.isNew) {
-                historyViewModel.addHistory("Produk ${product.name} telah ditambahkan pada ${formatTimestamp(System.currentTimeMillis())}")
-                productViewModel.markAsOld(product.id) // Tandai produk sebagai "tidak baru"
-            }
-        }
-    }
-
-// Dialog penghapusan produk
-    if (showDeleteDialog && productToDelete != null) {
-        DeleteConfirmationDialog(
-            product = productToDelete!!,
-            onDismiss = { showDeleteDialog = false },
-            onConfirmDelete = {
-                productToDelete?.name?.let { productName ->
-                    productViewModel.deleteProductByName(productName)
-                    historyViewModel.addHistory("Produk $productName telah dihapus pada ${formatTimestamp(System.currentTimeMillis())}")
-                }
-                showDeleteDialog = false
+    // Dialog Edit produk
+    if (showEditDialog && productToEdit != null) {
+        EditProductDialog(
+            product = productToEdit!!,
+            onDismiss = { showEditDialog = false },
+            onSave = { updatedProduct ->
+                productViewModel.updateProduct(updatedProduct)
+                showEditDialog = false
             }
         )
     }
-
 }
+
 
 
 
@@ -247,7 +236,143 @@ fun ProductCard(
         }
     }
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProductDialog(
+    product: Product,
+    onDismiss: () -> Unit,
+    onSave: (updatedProduct: Product) -> Unit
+) {
+    // States untuk field edit
+    var updatedName by remember { mutableStateOf(product.name) }
+    var updatedCategory by remember { mutableStateOf(product.category) }
+    var updatedPrice by remember { mutableStateOf(product.price.toString()) }
+    var updatedQuantity by remember { mutableStateOf(product.quantity.toString()) }
+    var expanded by remember { mutableStateOf(false) }
+    val categories = listOf("Gelang", "Kalung", "Cincin") // Kategori yang sama dengan AddProductScreen
 
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Produk", style = MaterialTheme.typography.titleLarge) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Input Kategori (Dropdown)
+                Text("Kategori", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = updatedCategory,
+                        onValueChange = {},
+                        readOnly = true,
+                        placeholder = { Text("Pilih Kategori") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            containerColor = Color.White,
+                            focusedBorderColor = Color(0xFF7C93C3),
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        categories.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category) },
+                                onClick = {
+                                    updatedCategory = category
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Input Nama
+                Text("Nama", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+                OutlinedTextField(
+                    value = updatedName,
+                    onValueChange = { updatedName = it },
+                    placeholder = { Text("Nama Produk") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.White,
+                        focusedBorderColor = Color(0xFF1976D2),
+                        unfocusedBorderColor = Color.Gray
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Input Harga
+                Text("Harga", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+                OutlinedTextField(
+                    value = updatedPrice,
+                    onValueChange = { updatedPrice = it },
+                    placeholder = { Text("Rp") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.White,
+                        focusedBorderColor = Color(0xFF1976D2),
+                        unfocusedBorderColor = Color.Gray
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Input Jumlah
+                Text("Jumlah", style = MaterialTheme.typography.bodyMedium, color = Color.Black)
+                OutlinedTextField(
+                    value = updatedQuantity,
+                    onValueChange = { updatedQuantity = it },
+                    placeholder = { Text("Jumlah") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.White,
+                        focusedBorderColor = Color(0xFF1976D2),
+                        unfocusedBorderColor = Color.Gray
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val updatedProduct = product.copy(
+                        name = updatedName,
+                        category = updatedCategory,
+                        price = updatedPrice.toIntOrNull() ?: product.price,
+                        quantity = updatedQuantity.toIntOrNull() ?: product.quantity
+                    )
+                    onSave(updatedProduct)
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF7C93C3)
+                )
+            ) {
+                Text("Simpan", color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal")
+            }
+        }
+    )
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
