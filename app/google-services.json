@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "288697696414",
+    "project_id": "selmate-6bf76",
+    "storage_bucket": "selmate-6bf76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288697696414:android:b006d87d2c69626b9c3b8f",
+        "android_client_info": {
+          "package_name": "com.example.sellmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGt3ubkT7mxZKzlp6A2qZG2uYJyUiuutQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
