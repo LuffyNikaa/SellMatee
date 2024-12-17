@@ -78,6 +78,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:24.8.1")
     implementation("com.google.firebase:firebase-analytics-ktx:21.4.0")
     implementation ("androidx.compose.material3:material3:<latest_version>")
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.2")
+
 
     // Testing
     testImplementation(libs.junit)

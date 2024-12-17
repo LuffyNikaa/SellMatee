@@ -1,117 +1,112 @@
 package com.example.sellmate.ui.login
 
-import androidx.compose.foundation.Image
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.sellmate.R
-import com.example.sellmate.viewmodel.AuthViewModel
+import com.example.sellmate.data.model.User
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(modifier: Modifier = Modifier, navController: NavHostController, authViewModel: AuthViewModel) {
+fun LoginPage(modifier: Modifier = Modifier, navController: NavHostController) {
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    // Menggunakan data class User untuk menyimpan email dan password
+    var user by remember { mutableStateOf(User()) }
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
 
     val passwordPattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#\$%^&*(),.?\":{}|<>]).{6,}$".toRegex()
-    val isPasswordValid = passwordPattern.matches(password)
+    val isPasswordValid = passwordPattern.matches(user.password)
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .background(Color(0xFF7F91BF)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        /*Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo",
-            modifier = Modifier.height(120.dp).clip(CircleShape)
-        )*/
-
-        Spacer( modifier = Modifier.height(16.dp))
-        Text(text = "SIGN IN",
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "SIGN IN",
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF000000)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        // OutlinedTextField untuk Email
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = user.email,
+            onValueChange = { user = user.copy(email = it) }, // Perbarui email di data class
             label = { Text(text = "Email") },
-            modifier = Modifier
-                .fillMaxWidth(0.6f),
+            modifier = Modifier.fillMaxWidth(0.6f),
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 containerColor = Color(0xFFD4C5A0)
             )
         )
 
-        // OutlinedTextField untuk Password
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = user.password,
+            onValueChange = { user = user.copy(password = it) }, // Perbarui password di data class
             label = { Text(text = "Password") },
             isError = !isPasswordValid,
-            modifier = Modifier
-                .fillMaxWidth(0.6f),
+            modifier = Modifier.fillMaxWidth(0.6f),
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 containerColor = Color(0xFFD4C5A0)
             )
         )
 
-        // Display error message if the password is invalid
-        if (!isPasswordValid && password.isNotEmpty()) {
+        if (!isPasswordValid && user.password.isNotEmpty()) {
             Text(
-                text = "*kata sandi harus paling tidak 6 karakter dan sertakan kombinasi angka, huruf dan karakter khusus (!@\$@%))",
+                text = "*Kata sandi harus paling tidak 6 karakter dan sertakan kombinasi angka, huruf, dan karakter khusus (!@\$%))",
                 fontSize = 10.sp,
-                color = androidx.compose.ui.graphics.Color.Red,
+                color = Color.Red,
                 modifier = Modifier.fillMaxWidth(0.6f)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        // Tombol Sign In
         PressableButton(
             text = "Sign In",
             normalColor = Color(0xFF1A1A57),
             pressedColor = Color(0xFFD4C5A0),
-            onClick = { navController.navigate("login") }
+            onClick = {
+                if (user.email.isNotEmpty() && isPasswordValid) {
+                    auth.signInWithEmailAndPassword(user.email, user.password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Login berhasil
+                                Toast.makeText(context, "Login berhasil!", Toast.LENGTH_SHORT).show()
+                                navController.navigate("home") // Arahkan ke halaman Home
+                            } else {
+                                // Login gagal
+                                Toast.makeText(
+                                    context,
+                                    "Login gagal: ${task.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(context, "Harap isi email dan password yang valid.", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        // Text "Don't have an account?" dan "Sign Up" yang bisa diklik terpisah
         Row {
             Text(
                 text = "Don't have an account? ",

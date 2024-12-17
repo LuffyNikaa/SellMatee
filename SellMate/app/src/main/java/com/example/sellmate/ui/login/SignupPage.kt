@@ -126,7 +126,7 @@ fun SignupPage(modifier: Modifier = Modifier, navController: NavHostController) 
             text = "Sign Up",
             normalColor = Color(0xFF1A1A57),
             pressedColor = Color(0xFFD4C5A0),
-            onClick = { navController.navigate("signup") }
+            onClick = { navController.navigate("home") }
         )
     }
 }

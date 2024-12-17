@@ -14,14 +14,14 @@ import com.example.sellmate.viewmodel.AuthViewModel
 fun MyAppNavHost(modifier: Modifier = Modifier, authViewModel: AuthViewModel){
     val navController = rememberNavController()
 
-    NavHost(navController, startDestination= "home", builder = {
+    NavHost(navController, startDestination= "landing", builder = {
 
-        composable("home") {
+        composable("landing") {
             LandingScreen(modifier, navController)
         }
 
         composable("login") {
-            LoginPage(modifier, navController, authViewModel)
+            LoginPage(modifier, navController)
         }
 
         composable("signup") {

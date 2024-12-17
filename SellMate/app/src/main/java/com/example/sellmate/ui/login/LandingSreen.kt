@@ -22,10 +22,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.sellmate.Home
 import com.example.sellmate.R
+import com.example.sellmate.ui.theme.SellMateTheme
 
 @Composable
 fun LandingScreen(
@@ -105,5 +109,13 @@ fun PressableButton(
         modifier = Modifier.width(200.dp)
     ) {
         Text(text = text, fontSize = 16.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LandingScreenPreview() {
+    SellMateTheme {
+        LandingScreen(navController = rememberNavController()) // Menampilkan preview dengan navController
     }
 }
